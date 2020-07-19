@@ -8,13 +8,10 @@ const Form = (props) => {
 		name: '',
 		special: '',
 		size: 'Large',
-		pineapple: false,
-		ham: false,
-		spinach: false,
-		bacon: false,
+		toppings: { ham: false, pineapple: false, spinach: false, bacon: false },
 	};
 
-	const [errors, setErrors] = useState([]);
+	const [errors, setErrors] = useState({ defaultState });
 	const [formState, setFormState] = useState(defaultState);
 	const [buttonDisabled, setButtonDisabled] = useState(true);
 
@@ -22,10 +19,6 @@ const Form = (props) => {
 		name: yup.string().min(2).required('Please provide your name.'),
 		special: yup.string(),
 		size: yup.string().required('Please select a size.'),
-		pineapple: yup.boolean(),
-		ham: yup.boolean(),
-		spinach: yup.boolean(),
-		bacon: yup.boolean(),
 	});
 
 	useEffect(() => {
@@ -37,9 +30,11 @@ const Form = (props) => {
 			.post('https://reqres.in/api/users', newOrder)
 			.then((res) => {
 				props.setOrders([...props.orders, res.data]);
+				console.log([...props.orders, res.data]);
 			})
 			.catch((err) => {
 				console.log("There's a problem with your order: ", newOrder);
+				console.log([...props.orders]);
 			});
 	};
 
@@ -49,10 +44,9 @@ const Form = (props) => {
 		const newOrder = {
 			name: formState.name,
 			size: formState.size,
-			pineapple: Object.keys(formState.pineapple),
-			ham: Object.keys(formState.ham),
-			spinach: Object.keys(formState.spinach),
-			bacon: Object.keys(formState.bacon),
+			toppings: Object.keys(formState.toppings).filter(
+				(topping) => formState.toppings[topping] === true
+			),
 			special: formState.special,
 		};
 		postNewOrder(newOrder);
@@ -78,6 +72,19 @@ const Form = (props) => {
 			);
 	};
 
+	const onCheckboxChange = (e) => {
+		const { name } = e.target;
+		const { checked } = e.target;
+
+		setFormState({
+			...formState,
+			toppings: {
+				...formState.toppings,
+				[name]: checked,
+			},
+		});
+	};
+
 	const handleChange = (e) => {
 		const value =
 			e.target.type === 'checkbox' ? e.target.checked : e.target.value;
@@ -89,59 +96,16 @@ const Form = (props) => {
 	};
 
 	return (
-		<div>
-			<form onSubmit={formSubmit} style={{ margin: '5%', fontSize: '1.4rem' }}>
-				<Pizza
-					type='text'
-					name='name'
-					placeholder='Name'
-					label='Name: '
-					errors={errors}
-					value={formState.name}
-					onChange={handleChange}
-				/>
-				<br />
-				<label htmlFor='pizzaSize'>
-					Pizza size:
-					<select id='size' name='size' onChange={handleChange}>
-						<option value='Large'>Large</option>
-						<option value='Medium'>Medium</option>
-						<option value='Small'>Small</option>
-					</select>
-					<br />
-					<br />
-				</label>
-				<label htmlFor='pinapple'>
-					<input name='pineapple' type='checkbox' onChange={handleChange} />
-					Pineapple
-				</label>
-				<label htmlFor='ham'>
-					<input name='ham' type='checkbox' onChange={handleChange} />
-					Ham
-				</label>
-				<label htmlFor='spinach'>
-					<input name='spinach' type='checkbox' onChange={handleChange} />
-					Spinach
-				</label>
-				<label htmlFor='bacon'>
-					<input name='bacon' type='checkbox' onChange={handleChange} />
-					Bacon
-				</label>
-				<br />
-				<br />
-				<Pizza
-					type='text'
-					name='special'
-					label='Special instructions: '
-					errors={errors}
-					value={formState.special}
-					onChange={handleChange}
-				/>
-				<br />
-				<button disabled={buttonDisabled}>Submit</button>
-			</form>
+		<div style={{ margin: '5%' }}>
+			<Pizza
+				formState={formState}
+				formSubmit={formSubmit}
+				errors={errors}
+				handleChange={handleChange}
+				onCheckboxChange={onCheckboxChange}
+				buttonDisabled={buttonDisabled}
+			/>
 		</div>
 	);
 };
-
 export default Form;

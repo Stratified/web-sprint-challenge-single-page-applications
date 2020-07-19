@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Home from './components/Home';
 import { Link, Route, Switch } from 'react-router-dom';
-import Pizza from './components/Pizza';
 import Form from './components/Form';
 import './App.css';
 
@@ -11,18 +10,21 @@ const App = () => {
 	return (
 		<div>
 			<Switch>
-				<Route exact path='/pizza' component={Form} />
+				<Route exact path='/pizza'>
+					<Form orders={orders} setOrders={setOrders} />
+				</Route>
 				<Route exact path='/'>
 					<Home />
 				</Route>
 			</Switch>
 			{orders.map((order) => {
 				return (
-					<div key={order.id} className='order container'>
-						<h4>{order.first_name} your order has been received</h4>
-						<h5>{order.size}</h5>
-						<h5>{order.toppings}</h5>
-						<h5>{order.instructions}</h5>
+					<div key={order.id}>
+						<h2>Success!</h2>
+						<h2>Name: {order.name}</h2>
+						<h2>Size: {order.size}</h2>
+						<h2>Toppings: {order.toppings}</h2>
+						<h2>Extra Instructions: {order.special}</h2>
 					</div>
 				);
 			})}
